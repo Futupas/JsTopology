@@ -1,0 +1,15 @@
+div.menu{
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    height: 100vh;
+    width: 25vw;
+}
+
+svg.circuit{
+    position: fixed;
+    top: 0px;
+    left: 25vw;
+    height: 100vh;
+    width: 75vw;
+}
