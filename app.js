@@ -72,6 +72,7 @@ function Draw() {
 }
 Draw();
 
+// Main function
 function Colorize(elementid, vl, array) {
     var element = Circuit.filter(function (e) { return e.id == elementid; })[0];
     if (element.Voltage === 'error') return;
@@ -90,6 +91,7 @@ function Colorize(elementid, vl, array) {
         element.Voltage = vl;
         // return;
     }
+    PaintElement(element.id);
     var childrenlinks = Links.filter(function(e) { return e[0] == element.id || e[1] == element.id; });
     var childrenids = [];
     for (var i = 0; i < childrenlinks.length; i++) {
@@ -99,9 +101,13 @@ function Colorize(elementid, vl, array) {
     for (var i = 0; i < childrenids.length; i++) {
         var child = Circuit.filter(function (e) { return e.id == childrenids[i]; })[0];
         if (child.Voltage === vl) {
-
+            // loop
+            // return true;
         } else if (child.Voltage === undefined) {
-            Colorize(child.id, vl, array);
+            var ret = Colorize(child.id, vl, array);
+            if (ret === false) {
+                return false;
+            }
         } else {
             // console.log('error');
             // console.log(array);
@@ -109,8 +115,12 @@ function Colorize(elementid, vl, array) {
             for (var j = 0; j < array.length; j++) {
                 array[j].Voltage = 'error';
             }
+            console.log('error');
+            console.log(array);
+            return false;
         }
     }
+    return true;
 }
 
 function Paint() {
@@ -133,20 +143,42 @@ function Paint() {
         }
     }
 }
+function PaintElement(elementid) {
+    var elem = Circuit.filter(function(e) { return e.id == elementid; })[0];
+    if (elem.Voltage === undefined) {
+        var color = Config.Line.defaultColor;
+    } else {
+        var color = Config.Voltages[elem.Voltage];
+    }
+    switch (elem.type.toLowerCase()) {
+        case 'line': 
+            elem.realElement.style.stroke = color;
+        break;
+        case 'switch': 
+            elem.realElement.style.stroke = color;
+        break;
+        case 'endpoint': 
+            elem.realElement.style.fill = color;
+        break;
+    }
+}
 
 function StartColorization() {
     var none_voltagesources = Circuit.filter(function(e) { return e.type.toLowerCase() != 'voltagesource'; });
     for (var i = 0; i < none_voltagesources.length; i++) {
         none_voltagesources[i].Voltage = undefined;
     }
+
     var voltagesources = Circuit.filter(function(e) { return e.type.toLowerCase() == 'voltagesource'; });
     for (var i = 0; i < voltagesources.length; i++) {
-        Colorize(voltagesources[i].id, voltagesources[i].Voltage, []);
+        var ret = Colorize(voltagesources[i].id, voltagesources[i].Voltage, []);
+        if (ret === false) break;
     }
 }
 
 StartColorization();
-Paint();
+// Paint();
+//here
 
 
 function DrawSwitchCheckboxes() {
